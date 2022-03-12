@@ -2,6 +2,7 @@ extern crate rand;
 
 use rand::Rng;
 use std::io;
+use colored::*;
 
 fn main() {
     struct Game {
@@ -29,13 +30,13 @@ fn main() {
     }
     
     fn create_player() -> Player {
-        println!("What is your name?");
+        println!("{}", "What is your name?".green());
         let mut player_name = String::new();
     
         io::stdin().read_line(&mut player_name)
             .expect("Failed to read your name.");
     
-        println!("Player one name is: {}", player_name.trim());
+        println!("{} {}", "Player name is:".purple(), player_name.trim().yellow());
         return Player {
             name: player_name,
         };
@@ -45,7 +46,7 @@ fn main() {
         let mut valid_round: bool = false;
 
         while !valid_round {
-            println!("How many sticks are you getting, {}?", current_player.name.trim());
+            println!("{} {}?", "How many sticks are you getting,".blue(), current_player.name.trim().yellow());
 
             let mut stick_amount = String::new();
             io::stdin().read_line(&mut stick_amount)
@@ -61,7 +62,7 @@ fn main() {
                 game.last_stick_amount_taken = input_number;
                 valid_round = true;
             } else {
-                println!("Please enter a valid amount, between 1-3 sticks.");
+                println!("{}", "Please enter a valid amount, between 1-3 sticks.".red());
             }
         }
 
@@ -73,13 +74,13 @@ fn main() {
     let player_one = create_player();
     let player_two = create_player();
 
-    println!("Welcome to the Stick Game. The objective of this game is to force the other player to get the last stick. You can choose to remove 1, 2 or 3 sticks at a time. The first player to remove the last stick loses. Good luck!");
+    println!("{}", "Welcome to the Stick Game. The objective of this game is to force the other player to get the last stick. You can choose to remove 1, 2 or 3 sticks at a time. The first player to remove the last stick loses. Good luck!".cyan());
 
-    println!("The number of sticks is: {}", game.total_sticks);
+    println!("{} {}", "The number of sticks is:".blue(), game.total_sticks);
 
     ////////////////////////////////////////////////////
 
-    println!("{} will go first.", player_one.name.trim());
+    println!("{} {}", player_one.name.trim().yellow(), "will go first.".blue());
 
     while !game.is_won {
         let mut current_player = &player_one;
@@ -89,15 +90,22 @@ fn main() {
 
         game = compute_round(current_player, game);
 
-        println!("{} took a total of {} sticks. We have {} sticks left on the stack.", current_player.name.trim(), game.last_stick_amount_taken.to_string().trim(), game.current_sticks);
+        println!("{} {} {} {} {} {}",
+            current_player.name.trim().yellow(),
+            "took a total of".blue(),
+            game.last_stick_amount_taken.to_string().trim().bright_green(),
+            "sticks. We have".blue(),
+            game.current_sticks.to_string().red(),
+            "sticks left on the stack.".blue(),
+        );
 
         if game.current_sticks < 1 {
             game.is_won = true;
-            println!("{} lost.", current_player.name.trim());
+            println!("{} {}", current_player.name.trim(), "lost!".red());
             return;
         } else if game.current_sticks == 1 {
             game.is_won = true;
-            println!("{} won.", current_player.name.trim());
+            println!("{} {}", current_player.name.trim(), "won!".bright_green());
             return;
         }
 
