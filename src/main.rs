@@ -5,6 +5,10 @@ use std::io;
 use colored::*;
 
 fn main() {
+    struct Player {
+        name: String
+    }
+
     struct Game {
         total_sticks: u32,
         current_sticks: u32,
@@ -13,8 +17,33 @@ fn main() {
         last_stick_amount_taken: u32,
     }
 
-    struct Player {
-        name: String
+    impl Game {
+        fn compute_round(mut self, current_player: &Player) -> Game {
+            let mut valid_round: bool = false;
+
+            while !valid_round {
+                println!("{} {}?", "How many sticks are you getting,".blue(), current_player.name.trim().yellow());
+    
+                let mut stick_amount = String::new();
+                io::stdin().read_line(&mut stick_amount)
+                    .expect("Amount not valid");
+        
+                let input_number: u32 = stick_amount
+                    .trim()
+                    .parse()
+                    .expect("Wanted a number");
+    
+                if input_number >= 1 && input_number <= 3 && input_number < self.current_sticks {
+                    self.current_sticks = self.current_sticks - input_number;
+                    self.last_stick_amount_taken = input_number;
+                    valid_round = true;
+                } else {
+                    println!("{}", "Please enter a valid amount, between 1-3 sticks.".red());
+                }
+            }
+
+            return self;
+        }
     }
 
     fn create_game() -> Game {
@@ -42,44 +71,13 @@ fn main() {
         };
     }
 
-    fn compute_round(current_player: &Player, mut game: Game) -> Game {
-        let mut valid_round: bool = false;
-
-        while !valid_round {
-            println!("{} {}?", "How many sticks are you getting,".blue(), current_player.name.trim().yellow());
-
-            let mut stick_amount = String::new();
-            io::stdin().read_line(&mut stick_amount)
-                .expect("Amount not valid");
-    
-            let input_number: u32 = stick_amount
-                .trim()
-                .parse()
-                .expect("Wanted a number");
-
-            if (input_number >= 1 && input_number <= 3 && input_number < game.current_sticks) {
-                game.current_sticks = game.current_sticks - input_number;
-                game.last_stick_amount_taken = input_number;
-                valid_round = true;
-            } else {
-                println!("{}", "Please enter a valid amount, between 1-3 sticks.".red());
-            }
-        }
-
-        return game;
-    }
-
     let mut game = create_game();
 
     let player_one = create_player();
     let player_two = create_player();
 
     println!("{}", "Welcome to the Stick Game. The objective of this game is to force the other player to get the last stick. You can choose to remove 1, 2 or 3 sticks at a time. The first player to remove the last stick loses. Good luck!".cyan());
-
     println!("{} {}", "The number of sticks is:".blue(), game.total_sticks);
-
-    ////////////////////////////////////////////////////
-
     println!("{} {}", player_one.name.trim().yellow(), "will go first.".blue());
 
     while !game.is_won {
@@ -88,7 +86,7 @@ fn main() {
             current_player = &player_two;
         }
 
-        game = compute_round(current_player, game);
+        game = game.compute_round(current_player);
 
         println!("{} {} {} {} {} {}",
             current_player.name.trim().yellow(),
